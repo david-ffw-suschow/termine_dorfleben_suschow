@@ -136,8 +136,38 @@ function absendenBearbeiten(uid) {
   schliessen();
 }
 
-function absendenLoeschen(uid) {
-  alert("👉 Hier wird später gelöscht\nUID: " + uid);
+async function absendenLoeschen(uid) {
+  if (!confirm("❗ Termin wirklich löschen?")) return;
+
+  let token = localStorage.getItem("github_token");
+
+  if (!token) {
+    token = prompt("🔐 GitHub Token eingeben:");
+    localStorage.setItem("github_token", token);
+  }
+
+  const response = await fetch("https://api.github.com/repos/david-ffw-suschow/termine_dorfleben_suschow/dispatches", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer " + token,
+      "Accept": "application/vnd.github+json"
+    },
+    body: JSON.stringify({
+      event_type: "delete_event",
+      client_payload: {
+        uid: uid
+      }
+    })
+  });
+
+  console.log("Status:", response.status);
+
+  if (response.ok) {
+    alert("✅ Termin wird gelöscht!");
+  } else {
+    alert("❌ Fehler: " + response.status);
+  }
+
   schliessen();
 }
 
