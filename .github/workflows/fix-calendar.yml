@@ -1,5 +1,8 @@
 name: Fix ICS Calendar
 
+permissions:
+  contents: write
+
 on:
   push:
     paths:
