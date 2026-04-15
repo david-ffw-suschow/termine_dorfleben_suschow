@@ -10,9 +10,12 @@ on:
       - ffw_suschow.ics
 
   schedule:
-    - cron: '0 * * * *'   # jede Stunde
+    - cron: '0 * * * *'
 
   workflow_dispatch:
+
+  repository_dispatch:
+    types: [delete_event]
 
 jobs:
   build:
