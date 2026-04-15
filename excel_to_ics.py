@@ -1,17 +1,25 @@
-from datetime import datetime
 import pandas as pd
+from datetime import datetime
+
+SHEET_URL = "https://docs.google.com/spreadsheets/d/1oBx1OCvo-0nRXhghLsWzMKEUn3UsKHAUxKOx9Ram1HE/export?format=csv"
 
 INPUT_ICS = "ffw_suschow.ics"
-EXCEL_FILE = "kalender.xlsx"
 TEMP_ICS = "temp.ics"
 
 
-def to_ics(date_str, time_str):
-    dt = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
-    return dt.strftime("%Y%m%dT%H%M%SZ")
+from datetime import datetime
+import pytz
+
+berlin = pytz.timezone("Europe/Berlin")
 
 
-df = pd.read_excel(EXCEL_FILE)
+def to_ics(date, time):
+    local_dt = berlin.localize(datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M:%S"))
+    utc_dt = local_dt.astimezone(pytz.utc)
+    return utc_dt.strftime("%Y%m%dT%H%M%SZ")
+
+
+df = pd.read_csv(SHEET_URL)
 
 with open(INPUT_ICS, "r", encoding="utf-8") as f:
     content = f.read()
@@ -19,8 +27,8 @@ with open(INPUT_ICS, "r", encoding="utf-8") as f:
 events = ""
 
 for _, row in df.iterrows():
-    dtstart = to_ics(row["Datum (YYYY-MM-DD)"], row["Startzeit (HH:MM)"])
-    dtend = to_ics(row["Datum (YYYY-MM-DD)"], row["Endzeit (HH:MM)"])
+    dtstart = to_ics(row["Datum"], row["Startzeit"])
+    dtend = to_ics(row["Datum"], row["Endzeit"])
 
     uid = f"{dtstart}@ffw-suschow"
 
