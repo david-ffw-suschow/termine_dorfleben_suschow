@@ -1,28 +1,23 @@
 from datetime import datetime
 import re
 
-INPUT_FILE = "input.ics"
-OUTPUT_FILE = "output.ics"
+INPUT_FILE = "temp.ics"
+OUTPUT_FILE = "ffw_suschow.ics"
 
 
 def parse_event(block):
-    dtstart_match = re.search(r"DTSTART:(\d+T\d+Z)", block)
+    dtstart = re.search(r"DTSTART:(\d+T\d+Z)", block)
     return {
         "raw": block,
-        "dtstart": dtstart_match.group(1) if dtstart_match else None
+        "dtstart": dtstart.group(1) if dtstart else None
     }
 
 
 def fix_uid(block, dtstart):
-    new_uid = f"{dtstart}@ffw-suschow"
-    if "UID:" in block:
-        block = re.sub(r"UID:.*", f"UID:{new_uid}", block)
-    else:
-        block = block.replace("BEGIN:VEVENT", f"BEGIN:VEVENT\nUID:{new_uid}")
-    return block
+    return re.sub(r"UID:.*", f"UID:{dtstart}@ffw-suschow", block)
 
 
-def parse_datetime(dt):
+def parse_dt(dt):
     return datetime.strptime(dt, "%Y%m%dT%H%M%SZ")
 
 
@@ -36,21 +31,14 @@ events = []
 
 for block in events_raw:
     event = parse_event(block)
-
     if event["dtstart"]:
-        fixed_block = fix_uid(block, event["dtstart"])
-        events.append((parse_datetime(event["dtstart"]), fixed_block))
+        fixed = fix_uid(block, event["dtstart"])
+        events.append((parse_dt(event["dtstart"]), fixed))
 
 events.sort(key=lambda x: x[0])
 
-print("Datei wird geschrieben:", OUTPUT_FILE)
-
 with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
     f.write(header)
-
-    for _, event in events:
-        f.write(event + "\n")
-
+    for _, e in events:
+        f.write(e + "\n")
     f.write("END:VCALENDAR\n")
-
-print("Kalender erfolgreich korrigiert!")
