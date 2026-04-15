@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Feuerwehr Termine</title>
+
+<style>
+body {
+  font-family: Arial;
+  padding: 20px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.termin {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.termin:hover {
+  background: #f0f0f0;
+}
+</style>
+</head>
+
+<body>
+
+<h2>📅 Termine</h2>
+
+<input type="text" id="search" placeholder="🔍 Suche (z.B. April, Ausbildung)">
+
+<div id="liste"></div>
+
+<script>
+const url = "termine_liste.csv";
+
+fetch(url)
+  .then(res => res.text())
+  .then(data => {
+    const rows = data.split("\n").slice(1);
+    const termine = rows.map(r => {
+      const parts = r.split(",");
+      return {
+        text: parts[0],
+        uid: parts[1]
+      };
+    });
+
+    function anzeigen(filter="") {
+      const liste = document.getElementById("liste");
+      liste.innerHTML = "";
+
+      termine
+        .filter(t => t.text.toLowerCase().includes(filter.toLowerCase()))
+        .forEach(t => {
+          const div = document.createElement("div");
+          div.className = "termin";
+          div.innerText = t.text;
+
+          div.onclick = () => {
+            alert("Ausgewählt:\n" + t.text + "\n\nUID:\n" + t.uid);
+          };
+
+          liste.appendChild(div);
+        });
+    }
+
+    anzeigen();
+
+    document.getElementById("search").addEventListener("input", e => {
+      anzeigen(e.target.value);
+    });
+  });
+</script>
+
+</body>
+</html>
