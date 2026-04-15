@@ -6,11 +6,11 @@ permissions:
 on:
   push:
     paths:
-      - 'kalender.xlsx'
-      - 'ffw_suschow.ics'
+      - kalender.xlsx
+      - ffw_suschow.ics
 
   schedule:
-    - - cron: '0 * * * *'
+    - cron: '0 * * * *'   # jede Stunde
 
   workflow_dispatch:
 
