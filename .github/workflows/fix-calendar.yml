@@ -1,0 +1,31 @@
+name: Fix ICS Calendar
+
+on:
+  push:
+    paths:
+      - 'input.ics'
+      - 'fix_ics.py'
+
+jobs:
+  fix-calendar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repo auschecken
+        uses: actions/checkout@v3
+
+      - name: Python installieren
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Script ausführen
+        run: python fix_ics.py
+
+      - name: Änderungen committen
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add output.ics
+          git commit -m "Auto-fixed ICS calendar" || echo "No changes"
+          git push
