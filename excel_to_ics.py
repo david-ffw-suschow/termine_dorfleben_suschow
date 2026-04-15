@@ -2,6 +2,10 @@ import pandas as pd
 from datetime import datetime
 import pytz
 import re
+import os
+
+# UID aus GitHub Action (für Löschen)
+uid_to_delete = os.getenv("UID_TO_DELETE")
 
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1oBx1OCvo-0nRXhghLsWzMKEUn3UsKHAUxKOx9Ram1HE/export?format=csv"
 
@@ -38,11 +42,21 @@ def parse_simple_input(text):
 # 📥 Sheet laden
 df = pd.read_csv(SHEET_URL)
 
-# 📥 bestehende ICS lesen
 with open(INPUT_ICS, "r", encoding="utf-8") as f:
     content = f.read()
 
-# 🔍 vorhandene UIDs sammeln (gegen Duplikate)
+# ❌ HIER NEU
+if uid_to_delete:
+    print("Lösche Termin mit UID:", uid_to_delete)
+
+    content = re.sub(
+        rf"BEGIN:VEVENT.*?UID:{uid_to_delete}.*?END:VEVENT",
+        "",
+        content,
+        flags=re.DOTALL
+    )
+
+# 🔍 vorhandene UIDs sammeln
 existing_uids = set(re.findall(r"UID:(.+)", content))
 
 new_events = ""
