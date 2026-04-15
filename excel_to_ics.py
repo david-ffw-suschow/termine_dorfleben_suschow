@@ -97,3 +97,31 @@ with open(TEMP_ICS, "w", encoding="utf-8") as f:
     f.write(updated_content)
 
 print("Neue Termine hinzugefügt (ohne Duplikate)")
+
+# 🔥 Terminliste für Auswahl erzeugen
+termine_liste = []
+
+for e in updated_events:
+    uid = e["uid"]
+
+    dt = datetime.strptime(uid.split("@")[0], "%Y%m%dT%H%M%SZ")
+
+    # UTC → deutsche Zeit
+    local_dt = pytz.utc.localize(dt).astimezone(berlin)
+
+    # Titel rausziehen
+    summary = ""
+    if "SUMMARY:" in e["raw"]:
+        summary = e["raw"].split("SUMMARY:")[1].split("\n")[0]
+
+    text = local_dt.strftime("%d.%m.%Y %H:%M") + " - " + summary
+
+    termine_liste.append({
+        "Anzeige": text,
+        "UID": uid
+    })
+
+# CSV speichern
+pd.DataFrame(termine_liste).to_csv("termine_liste.csv", index=False)
+
+print("Terminliste erstellt")
