@@ -43,6 +43,8 @@ for block in events_raw:
 
 events.sort(key=lambda x: x[0])
 
+print("Datei wird geschrieben:", OUTPUT_FILE)
+
 with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
     f.write(header)
 
