@@ -99,20 +99,26 @@ with open(TEMP_ICS, "w", encoding="utf-8") as f:
 print("Neue Termine hinzugefügt (ohne Duplikate)")
 
 # 🔥 Terminliste für Auswahl erzeugen
+
+events = re.findall(r"BEGIN:VEVENT.*?END:VEVENT", updated_content, re.DOTALL)
+
 termine_liste = []
 
-for e in updated_events:
-    uid = e["uid"]
+for e in events:
+    uid_match = re.search(r"UID:(.+)", e)
+    summary_match = re.search(r"SUMMARY:(.+)", e)
+
+    if not uid_match:
+        continue
+
+    uid = uid_match.group(1)
 
     dt = datetime.strptime(uid.split("@")[0], "%Y%m%dT%H%M%SZ")
 
     # UTC → deutsche Zeit
     local_dt = pytz.utc.localize(dt).astimezone(berlin)
 
-    # Titel rausziehen
-    summary = ""
-    if "SUMMARY:" in e["raw"]:
-        summary = e["raw"].split("SUMMARY:")[1].split("\n")[0]
+    summary = summary_match.group(1) if summary_match else ""
 
     text = local_dt.strftime("%d.%m.%Y %H:%M") + " - " + summary
 
