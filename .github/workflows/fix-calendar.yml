@@ -25,6 +25,9 @@ jobs:
       - name: Repo holen
         uses: actions/checkout@v3
 
+      - name: UID setzen
+        run: echo "UID_TO_DELETE=${{ github.event.client_payload.uid }}" >> $GITHUB_ENV
+
       - name: Python installieren
         uses: actions/setup-python@v4
         with:
