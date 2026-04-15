@@ -44,7 +44,8 @@ for block in events_raw:
 # 🔥 Sortieren
 events.sort(key=lambda x: x[0])
 
-# 🔥 Schreiben
+print("Datei wird geschrieben:", OUTPUT_FILE)
+
 with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
     f.write(header)
 
@@ -52,5 +53,5 @@ with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write(event + "\n")
 
     f.write("END:VCALENDAR\n")
-
+    
 print("Kalender erfolgreich korrigiert!")
