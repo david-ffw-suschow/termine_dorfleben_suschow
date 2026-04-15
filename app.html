@@ -7,7 +7,7 @@
 <style>
 body {
   font-family: Arial;
-  padding: 20px;
+  padding: 15px;
 }
 
 input {
@@ -17,33 +17,54 @@ input {
 }
 
 .termin {
-  padding: 10px;
+  padding: 12px;
   border-bottom: 1px solid #ccc;
+}
+
+button {
+  margin-top: 5px;
+  margin-right: 5px;
+  padding: 6px 10px;
   cursor: pointer;
 }
 
-.termin:hover {
-  background: #f0f0f0;
+.edit { background: #4CAF50; color: white; }
+.delete { background: #f44336; color: white; }
+
+#popup {
+  position: fixed;
+  top: 20%;
+  left: 10%;
+  right: 10%;
+  background: white;
+  border: 2px solid #333;
+  padding: 15px;
+  display: none;
 }
 </style>
 </head>
 
 <body>
 
-<h2>📅 Termine</h2>
+<h2>📅 Feuerwehr Termine</h2>
 
 <input type="text" id="search" placeholder="🔍 Suche (z.B. April, Ausbildung)">
 
 <div id="liste"></div>
 
+<div id="popup"></div>
+
 <script>
 const url = "termine_liste.csv";
+
+let termine = [];
 
 fetch(url)
   .then(res => res.text())
   .then(data => {
     const rows = data.split("\n").slice(1);
-    const termine = rows.map(r => {
+
+    termine = rows.map(r => {
       const parts = r.split(",");
       return {
         text: parts[0],
@@ -51,31 +72,78 @@ fetch(url)
       };
     });
 
-    function anzeigen(filter="") {
-      const liste = document.getElementById("liste");
-      liste.innerHTML = "";
-
-      termine
-        .filter(t => t.text.toLowerCase().includes(filter.toLowerCase()))
-        .forEach(t => {
-          const div = document.createElement("div");
-          div.className = "termin";
-          div.innerText = t.text;
-
-          div.onclick = () => {
-            alert("Ausgewählt:\n" + t.text + "\n\nUID:\n" + t.uid);
-          };
-
-          liste.appendChild(div);
-        });
-    }
-
     anzeigen();
-
-    document.getElementById("search").addEventListener("input", e => {
-      anzeigen(e.target.value);
-    });
   });
+
+function anzeigen(filter="") {
+  const liste = document.getElementById("liste");
+  liste.innerHTML = "";
+
+  termine
+    .filter(t => t.text.toLowerCase().includes(filter.toLowerCase()))
+    .forEach(t => {
+      const div = document.createElement("div");
+      div.className = "termin";
+
+      div.innerHTML = `
+        <b>${t.text}</b><br>
+        <button class="edit">✏️ Bearbeiten</button>
+        <button class="delete">❌ Löschen</button>
+      `;
+
+      div.querySelector(".edit").onclick = () => bearbeiten(t);
+      div.querySelector(".delete").onclick = () => loeschen(t);
+
+      liste.appendChild(div);
+    });
+}
+
+document.getElementById("search").addEventListener("input", e => {
+  anzeigen(e.target.value);
+});
+
+function bearbeiten(t) {
+  const popup = document.getElementById("popup");
+
+  popup.style.display = "block";
+  popup.innerHTML = `
+    <h3>✏️ Termin bearbeiten</h3>
+    <p>${t.text}</p>
+
+    <input id="titel" placeholder="Neuer Titel"><br>
+    <input id="zeit" placeholder="Neue Zeit (z.B. 18:30)"><br><br>
+
+    <button onclick="absendenBearbeiten('${t.uid}')">Speichern</button>
+    <button onclick="schliessen()">Abbrechen</button>
+  `;
+}
+
+function loeschen(t) {
+  const popup = document.getElementById("popup");
+
+  popup.style.display = "block";
+  popup.innerHTML = `
+    <h3>❌ Termin löschen</h3>
+    <p>${t.text}</p>
+
+    <button onclick="absendenLoeschen('${t.uid}')">Löschen bestätigen</button>
+    <button onclick="schliessen()">Abbrechen</button>
+  `;
+}
+
+function absendenBearbeiten(uid) {
+  alert("👉 Hier kannst du später direkt dein Script triggern\nUID: " + uid);
+  schliessen();
+}
+
+function absendenLoeschen(uid) {
+  alert("👉 Hier wird später gelöscht\nUID: " + uid);
+  schliessen();
+}
+
+function schliessen() {
+  document.getElementById("popup").style.display = "none";
+}
 </script>
 
 </body>
